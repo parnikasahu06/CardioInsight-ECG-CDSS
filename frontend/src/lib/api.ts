@@ -1,10 +1,11 @@
 import { ECGPredictionResponse } from '@/types/ecg';
 
-let activeBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+let activeBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cardioinsight-ecg-cdss.onrender.com';
 
 async function getWorkingBaseUrl(): Promise<string> {
   const candidates = [
     process.env.NEXT_PUBLIC_API_URL,
+    'https://cardioinsight-ecg-cdss.onrender.com',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
   ].filter(Boolean) as string[];
@@ -84,7 +85,7 @@ export async function uploadECGFiles(heaFile: File, datFile: File): Promise<ECGP
     const msg = error.message || '';
     if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('Load failed')) {
       throw new Error(
-        'Backend Offline: Unable to reach the ECG Analysis Server. Please verify that the FastAPI backend is running at http://127.0.0.1:8000.'
+        `Backend Offline: Unable to reach the ECG Analysis Server (${baseUrl}). Please verify that the FastAPI backend is running.`
       );
     }
 
