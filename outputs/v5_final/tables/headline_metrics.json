@@ -1,0 +1,16 @@
+{
+  "model": "XGBoost",
+  "threshold_policy": "precision_target",
+  "recall_floor": 0.7,
+  "n_test_records": 2158,
+  "test_macro_auc": 0.9250972802731898,
+  "fmax_sample_centric": 0.8024384799634504,
+  "macro_precision": 0.7861049984739557,
+  "micro_precision": 0.8109153416415986,
+  "macro_recall": 0.6665704176933631,
+  "macro_f1": 0.7177848572335256,
+  "micro_f1": 0.7372533697987889,
+  "mean_per_label_accuracy": 0.8753475440222428,
+  "macro_balanced_accuracy": 0.8056846854864418,
+  "exact_match_accuracy": 0.5384615384615384
+}
