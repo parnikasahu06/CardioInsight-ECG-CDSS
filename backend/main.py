@@ -33,9 +33,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         # Pre-warm singletons during startup
         get_feature_extractor()
-        get_ecg_predictor()
+        predictor = get_ecg_predictor()
+
+        # Dummy forward pass to ensure pipeline model and explainers execute cleanly
+        logger.info("Running pre-warm dummy forward pass...")
+        dummy_raw = {feat: 0.0 for feat in predictor.loader.feature_names_in}
+        dummy_raw_df = predictor.align_raw_features(dummy_raw)
+        dummy_prep_df = predictor.preprocess_features(dummy_raw_df)
+        predictor.predict_probabilities(dummy_prep_df)
+        predictor.explainer.top_features(dummy_prep_df, predictor.loader.class_names[0])
+
         boot_duration = time.perf_counter() - start_time
-        logger.info(f"ECG CDSS Models pre-warmed successfully in {boot_duration:.3f}s. Server ready.")
+        logger.info(f"ECG CDSS Models pre-warmed & verified successfully in {boot_duration:.3f}s. Server ready.")
     except Exception as e:
         logger.critical(f"FATAL: Failed to initialize ML model pipeline during startup: {e}", exc_info=True)
         raise e
