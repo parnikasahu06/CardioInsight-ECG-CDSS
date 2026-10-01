@@ -1,0 +1,315 @@
+{
+  "feature_version": "v5.0",
+  "random_state": 42,
+  "sampling_rate": 500,
+  "versions": {
+    "python": "3.14.0",
+    "numpy": "2.4.3",
+    "pandas": "2.3.3",
+    "sklearn": "1.8.0",
+    "neurokit2": "0.2.13",
+    "wfdb": "4.3.1"
+  },
+  "n_records_metadata": 21799,
+  "n_records_labeled": 21388,
+  "n_records_features": 21388,
+  "n_extraction_failures": 0,
+  "class_names": [
+    "CD",
+    "HYP",
+    "MI",
+    "NORM",
+    "STTC"
+  ],
+  "split": {
+    "train_folds_1_8": 17084,
+    "val_fold_9": 2146,
+    "test_fold_10": 2158
+  },
+  "n_features_extracted": 322,
+  "n_features_after_preprocessing": 274,
+  "use_demographics": false,
+  "min_likelihood": 0,
+  "selected_model": "XGBoost",
+  "selection_rule": "simplest model within 0.003 of the best validation (fold 9) macro AUC",
+  "chain_inner_cv": "patient-grouped StratifiedGroupKFold",
+  "threshold_policy": "precision_target",
+  "recall_floor": 0.7,
+  "thresholds_tuned_on": "validation fold (9), per class, both F1-optimal and precision-targeted",
+  "model_comparison": [
+    {
+      "Model": "XGBoost",
+      "Val macro AUC": 0.9332663775093646,
+      "Test macro AUC": 0.9250972802731898,
+      "Test AUC 95% CI": "[0.918, 0.932]",
+      "Test Fmax": 0.8024384799634504,
+      "Test macro F1": 0.7177848572335256,
+      "Test micro F1": 0.7372533697987889,
+      "Test macro precision": 0.7861049984739557,
+      "Test macro recall": 0.6665704176933631,
+      "Test macro accuracy": 0.8753475440222428,
+      "Test exact-match acc": 0.5384615384615384,
+      "Test macro AP": 0.8174801858231963
+    },
+    {
+      "Model": "XGBoost Chain",
+      "Val macro AUC": 0.9328950499667599,
+      "Test macro AUC": 0.924854528812531,
+      "Test AUC 95% CI": "[0.918, 0.932]",
+      "Test Fmax": 0.8040235613348666,
+      "Test macro F1": 0.7141065800217569,
+      "Test micro F1": 0.7339055793991416,
+      "Test macro precision": 0.7803109355972804,
+      "Test macro recall": 0.6644451318740443,
+      "Test macro accuracy": 0.8735866543095459,
+      "Test exact-match acc": 0.540778498609824,
+      "Test macro AP": 0.8166354747399266
+    },
+    {
+      "Model": "Random Forest",
+      "Val macro AUC": 0.926376854742483,
+      "Test macro AUC": 0.9196227731555867,
+      "Test AUC 95% CI": "[0.912, 0.927]",
+      "Test Fmax": 0.7976750354153146,
+      "Test macro F1": 0.7102738438746867,
+      "Test micro F1": 0.7289156626506024,
+      "Test macro precision": 0.7415753960896664,
+      "Test macro recall": 0.6944082404642453,
+      "Test macro accuracy": 0.8665430954587581,
+      "Test exact-match acc": 0.5231696014828545,
+      "Test macro AP": 0.800064683585996
+    },
+    {
+      "Model": "Logistic Regression",
+      "Val macro AUC": 0.9016347291355267,
+      "Test macro AUC": 0.8882059586693417,
+      "Test AUC 95% CI": "[0.879, 0.897]",
+      "Test Fmax": 0.7471175439087249,
+      "Test macro F1": 0.6726681229761248,
+      "Test micro F1": 0.696002933626696,
+      "Test macro precision": 0.6864183130464727,
+      "Test macro recall": 0.6726992444754857,
+      "Test macro accuracy": 0.846339202965709,
+      "Test exact-match acc": 0.47405004633920295,
+      "Test macro AP": 0.7324315927651956
+    }
+  ],
+  "per_class": [
+    {
+      "Class": "CD",
+      "Support": 496,
+      "Threshold": 0.7,
+      "AUC": 0.9150763266177554,
+      "AUC 95% CI": "[0.898, 0.932]",
+      "AP": 0.8406970880603065,
+      "Precision": 0.867816091954023,
+      "Recall (sens.)": 0.6088709677419355,
+      "Specificity": 0.9723225030084236,
+      "Accuracy": 0.8887859128822985,
+      "Balanced acc.": 0.7905967353751795,
+      "F1": 0.7156398104265402,
+      "F1 @0.5": 0.7452631578947368
+    },
+    {
+      "Class": "HYP",
+      "Support": 262,
+      "Threshold": 0.42,
+      "AUC": 0.9084251296421555,
+      "AUC 95% CI": "[0.889, 0.927]",
+      "AP": 0.6899399615539707,
+      "Precision": 0.6028368794326241,
+      "Recall (sens.)": 0.648854961832061,
+      "Specificity": 0.9409282700421941,
+      "Accuracy": 0.9054680259499537,
+      "Balanced acc.": 0.7948916159371275,
+      "F1": 0.625,
+      "F1 @0.5": 0.6254826254826255
+    },
+    {
+      "Class": "MI",
+      "Support": 550,
+      "Threshold": 0.63,
+      "AUC": 0.9354748982360922,
+      "AUC 95% CI": "[0.924, 0.945]",
+      "AP": 0.8502695420658815,
+      "Precision": 0.810989010989011,
+      "Recall (sens.)": 0.6709090909090909,
+      "Specificity": 0.9465174129353234,
+      "Accuracy": 0.876274328081557,
+      "Balanced acc.": 0.8087132519222071,
+      "F1": 0.7343283582089553,
+      "F1 @0.5": 0.7483870967741936
+    },
+    {
+      "Class": "NORM",
+      "Support": 963,
+      "Threshold": 0.88,
+      "AUC": 0.9436688868902531,
+      "AUC 95% CI": "[0.934, 0.952]",
+      "AP": 0.9204732489238613,
+      "Precision": 0.906084656084656,
+      "Recall (sens.)": 0.711318795430945,
+      "Specificity": 0.9405857740585774,
+      "Accuracy": 0.8382761816496757,
+      "Balanced acc.": 0.8259522847447611,
+      "F1": 0.7969749854566609,
+      "F1 @0.5": 0.8624031007751938
+    },
+    {
+      "Class": "STTC",
+      "Support": 521,
+      "Threshold": 0.68,
+      "AUC": 0.9228411599796923,
+      "AUC 95% CI": "[0.909, 0.934]",
+      "AP": 0.7860210885119607,
+      "Precision": 0.742798353909465,
+      "Recall (sens.)": 0.6928982725527831,
+      "Specificity": 0.9236408063530849,
+      "Accuracy": 0.8679332715477294,
+      "Balanced acc.": 0.808269539452934,
+      "F1": 0.7169811320754716,
+      "F1 @0.5": 0.7298747763864043
+    }
+  ],
+  "threshold_policy_comparison": [
+    {
+      "Class": "CD",
+      "Policy": "F1-optimal",
+      "Threshold": 0.57,
+      "Precision": 0.8072289156626506,
+      "Recall": 0.6754032258064516,
+      "F1": 0.7354555433589463,
+      "Val precision": 0.834841628959276,
+      "Val recall": 0.7454545454545455
+    },
+    {
+      "Class": "CD",
+      "Policy": "precision_target",
+      "Threshold": 0.7,
+      "Precision": 0.867816091954023,
+      "Recall": 0.6088709677419355,
+      "F1": 0.7156398104265402,
+      "Val precision": 0.8617283950617284,
+      "Val recall": 0.705050505050505
+    },
+    {
+      "Class": "HYP",
+      "Policy": "F1-optimal",
+      "Threshold": 0.42,
+      "Precision": 0.6028368794326241,
+      "Recall": 0.648854961832061,
+      "F1": 0.625,
+      "Val precision": 0.6126760563380281,
+      "Val recall": 0.6492537313432836
+    },
+    {
+      "Class": "HYP",
+      "Policy": "precision_target",
+      "Threshold": 0.42,
+      "Precision": 0.6028368794326241,
+      "Recall": 0.648854961832061,
+      "F1": 0.625,
+      "Val precision": 0.6126760563380281,
+      "Val recall": 0.6492537313432836
+    },
+    {
+      "Class": "MI",
+      "Policy": "F1-optimal",
+      "Threshold": 0.48,
+      "Precision": 0.7463503649635036,
+      "Recall": 0.7436363636363637,
+      "F1": 0.7449908925318761,
+      "Val precision": 0.7504520795660036,
+      "Val recall": 0.7685185185185185
+    },
+    {
+      "Class": "MI",
+      "Policy": "precision_target",
+      "Threshold": 0.63,
+      "Precision": 0.810989010989011,
+      "Recall": 0.6709090909090909,
+      "F1": 0.7343283582089553,
+      "Val precision": 0.7966457023060797,
+      "Val recall": 0.7037037037037037
+    },
+    {
+      "Class": "NORM",
+      "Policy": "F1-optimal",
+      "Threshold": 0.61,
+      "Precision": 0.8312318137730359,
+      "Recall": 0.8899273104880582,
+      "F1": 0.8595787362086259,
+      "Val precision": 0.8383233532934131,
+      "Val recall": 0.8795811518324608
+    },
+    {
+      "Class": "NORM",
+      "Policy": "precision_target",
+      "Threshold": 0.88,
+      "Precision": 0.906084656084656,
+      "Recall": 0.711318795430945,
+      "F1": 0.7969749854566609,
+      "Val precision": 0.9195088676671214,
+      "Val recall": 0.7057591623036649
+    },
+    {
+      "Class": "STTC",
+      "Policy": "F1-optimal",
+      "Threshold": 0.55,
+      "Precision": 0.6987740805604203,
+      "Recall": 0.7658349328214972,
+      "F1": 0.7307692307692307,
+      "Val precision": 0.7358156028368794,
+      "Val recall": 0.7859848484848485
+    },
+    {
+      "Class": "STTC",
+      "Policy": "precision_target",
+      "Threshold": 0.68,
+      "Precision": 0.742798353909465,
+      "Recall": 0.6928982725527831,
+      "F1": 0.7169811320754716,
+      "Val precision": 0.7649484536082474,
+      "Val recall": 0.7026515151515151
+    }
+  ],
+  "headline_test_metrics": {
+    "model": "XGBoost",
+    "threshold_policy": "precision_target",
+    "recall_floor": 0.7,
+    "n_test_records": 2158,
+    "test_macro_auc": 0.9250972802731898,
+    "fmax_sample_centric": 0.8024384799634504,
+    "macro_precision": 0.7861049984739557,
+    "micro_precision": 0.8109153416415986,
+    "macro_recall": 0.6665704176933631,
+    "macro_f1": 0.7177848572335256,
+    "micro_f1": 0.7372533697987889,
+    "mean_per_label_accuracy": 0.8753475440222428,
+    "macro_balanced_accuracy": 0.8056846854864418,
+    "exact_match_accuracy": 0.5384615384615384
+  },
+  "seed_study": [
+    {
+      "seed": 0,
+      "test macro AUC": 0.9259633645989286,
+      "test macro precision": 0.7833500595562333,
+      "test macro recall": 0.6611637242942956,
+      "test macro F1": 0.7153704601398256
+    },
+    {
+      "seed": 1,
+      "test macro AUC": 0.9251252499962626,
+      "test macro precision": 0.7896182674513168,
+      "test macro recall": 0.66001750780573,
+      "test macro F1": 0.7167574972299731
+    },
+    {
+      "seed": 2,
+      "test macro AUC": 0.9247332736292687,
+      "test macro precision": 0.7860077555934231,
+      "test macro recall": 0.6580662355712985,
+      "test macro F1": 0.7137176078542319
+    }
+  ]
+}

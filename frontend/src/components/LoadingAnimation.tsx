@@ -6,7 +6,7 @@ import { Activity, Cpu, Sparkles, CheckCircle2 } from 'lucide-react';
 const ANALYSIS_STAGES = [
   { id: 1, text: '1. Validating ECG record (.hea + .dat)' },
   { id: 2, text: '2. Reading 12-lead signal waveforms' },
-  { id: 3, text: '3. Extracting 213 ECG features' },
+  { id: 3, text: '3. Extracting 322 ECG features' },
   { id: 4, text: '4. Running XGBoost inference' },
   { id: 5, text: '5. Computing SHAP explanations' },
   { id: 6, text: '6. Preparing clinical decision support' },

@@ -42,6 +42,9 @@ class RecordInfoModel(BaseModel):
     n_leads: int = Field(..., description="Number of ECG leads")
     hea_filename: str = Field(..., description="Input header filename")
     dat_filename: str = Field(..., description="Input signal data filename")
+    extracted_features_count: Optional[int] = Field(322, description="Total raw extracted ECG features")
+    model_features_count: Optional[int] = Field(274, description="Total preprocessed model features")
+
 
 
 class WaveformDataModel(BaseModel):

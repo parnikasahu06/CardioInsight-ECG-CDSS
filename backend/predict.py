@@ -1,16 +1,15 @@
 """
 =========================================================
-Clinical Prediction Pipeline
+Clinical Prediction Pipeline - v5 Model Architecture
 ECG Clinical Decision Support System
 =========================================================
 Pipeline Responsibilities:
-1. Align raw extracted features with model schema
-2. Apply trained median imputer & standard scaler
-3. Execute XGBoost multi-output prediction
-4. Format class probabilities & calibrated confidence score
-5. Apply condition-aware clinical risk stratification
-6. Compute SHAP feature attributions
-7. Return standardized clinical response payload with disclaimers
+1. Align raw 322 extracted features with model schema
+2. Apply v5 fitted preprocessor pipeline (Imputation, Clipping, Pruning, Scaling)
+3. Execute XGBoost multi-label inference & threshold decision logic
+4. Compute SHAP feature attributions on preprocessed features
+5. Generate clinical risk tier, review guidance, and warnings
+6. Return standardized JSON response matching API schema
 =========================================================
 """
 
@@ -32,94 +31,75 @@ logger = setup_logger("predict_pipeline")
 
 class ECGPredictor:
     """
-    End-to-end ECG prediction and clinical explainability engine.
+    End-to-end ECG prediction and explainability engine for v5 model bundle.
     """
 
     def __init__(self) -> None:
-        logger.info("Initializing ECGPredictor pipeline...")
+        logger.info("Initializing ECGPredictor pipeline with v5 bundle loader...")
         self.loader = ModelLoader()
         self.explainer = SHAPExplainer(self.loader)
         logger.info("ECGPredictor Pipeline ready.")
 
-    def align_features(self, extracted_features: Dict[str, Any]) -> pd.DataFrame:
+    def align_raw_features(self, extracted_features: Dict[str, Any]) -> pd.DataFrame:
         """
-        Align extracted features with trained model feature names order.
-        Missing features are populated with np.nan for median imputation.
-        Optimized with pre-allocated numpy array.
+        Align extracted features with the 322 raw feature names order.
+        Missing features populated with np.nan.
         """
-        feature_names = self.loader.feature_names
+        feature_names = self.loader.feature_names_in
         arr = np.empty((1, len(feature_names)), dtype=np.float64)
         for i, feature in enumerate(feature_names):
             arr[0, i] = extracted_features.get(feature, np.nan)
         return pd.DataFrame(arr, columns=feature_names)
 
-    def apply_imputer(self, feature_df: pd.DataFrame) -> pd.DataFrame:
+    def preprocess_features(self, raw_df: pd.DataFrame) -> pd.DataFrame:
         """
-        Fill infinite or missing values using the trained median imputer.
+        Apply v5 fitted pipeline (MissingFilter -> Imputer -> Clipper -> Pruner -> Scaler).
+        Returns preprocessed DataFrame with 274 features.
         """
-        clean_df = feature_df.replace([np.inf, -np.inf], np.nan)
-        imputed_array = self.loader.imputer.transform(clean_df)
-        return pd.DataFrame(imputed_array, columns=self.loader.feature_names)
+        clean_df = raw_df.replace([np.inf, -np.inf], np.nan)
+        preprocessed_array = self.loader.preprocessor.transform(clean_df)
+        return pd.DataFrame(preprocessed_array, columns=self.loader.feature_names_model)
 
-    def apply_scaler(self, feature_df: pd.DataFrame) -> pd.DataFrame:
+    def predict_probabilities(self, preprocessed_df: pd.DataFrame) -> Dict[str, float]:
         """
-        Scale features using the trained StandardScaler.
+        Execute predict_proba on preprocessed vector.
+        Returns dict of class name -> probability percentage (0-100%).
         """
-        scaled_array = self.loader.scaler.transform(feature_df)
-        return pd.DataFrame(scaled_array, columns=self.loader.feature_names)
-
-    def predict(self, scaled_df: pd.DataFrame) -> np.ndarray:
-        """
-        Execute raw multi-output classification.
-        """
-        return self.loader.model.predict(scaled_df)
-
-    def predict_proba(self, scaled_df: pd.DataFrame) -> Any:
-        """
-        Predict class probabilities for each binary estimator.
-        """
-        return self.loader.model.predict_proba(scaled_df)
-
-    def _preprocess_features(self, extracted_features: Dict[str, Any]) -> pd.DataFrame:
-        """
-        Internal pipeline helper: align, impute, and scale features.
-        """
-        aligned = self.align_features(extracted_features)
-        imputed = self.apply_imputer(aligned)
-        return self.apply_scaler(imputed)
-
-    def _process_probabilities(
-        self,
-        prediction_vector: List[int],
-        probabilities: Any
-    ) -> Tuple[Dict[str, float], List[str], Dict[str, float]]:
-        """
-        Format raw estimator probabilities into percentage scores and confidence mappings.
-        Only diagnostic classes trained in the model are evaluated.
-        """
-        probability_dict: Dict[str, float] = {}
-        predicted_classes: List[str] = []
-        confidence_scores: Dict[str, float] = {}
-
+        raw_probas = self.loader.model.predict_proba(preprocessed_df)[0]
+        prob_dict: Dict[str, float] = {}
         for i, class_name in enumerate(self.loader.class_names):
-            probability = float(probabilities[i][0][1])
-            probability_dict[class_name] = round(probability * 100.0, 2)
+            prob = float(raw_probas[i])
+            prob_dict[class_name] = round(prob * 100.0, 2)
+        return prob_dict
 
-            if prediction_vector[i] == 1:
+    def evaluate_thresholds(self, prob_dict: Dict[str, float]) -> Tuple[List[str], str, float]:
+        """
+        Apply precision_target thresholds per class:
+        predicted = prob >= threshold
+        Returns (predicted_classes, primary_class, primary_confidence)
+        """
+        predicted_classes: List[str] = []
+        for class_name in self.loader.class_names:
+            prob_ratio = prob_dict[class_name] / 100.0
+            thresh = self.loader.thresholds.get(class_name, 0.5)
+            if prob_ratio >= thresh:
                 predicted_classes.append(class_name)
-                confidence_scores[class_name] = probability
 
-        return probability_dict, predicted_classes, confidence_scores
+        # Primary class selection logic:
+        if predicted_classes:
+            # Pick predicted class with highest margin above its threshold
+            margins = {c: (prob_dict[c] / 100.0) - self.loader.thresholds.get(c, 0.5) for c in predicted_classes}
+            primary_class = max(margins, key=margins.get)
+        else:
+            # Fallback if no class exceeds threshold: pick highest raw probability class
+            primary_class = max(prob_dict, key=prob_dict.get)
+
+        confidence = prob_dict[primary_class]
+        return predicted_classes, primary_class, confidence
 
     @staticmethod
     def _calculate_clinical_risk(predicted_class: str, confidence: float) -> str:
-        """
-        Condition-aware clinical risk stratification logic:
-        - MI (Myocardial Infarction) is automatically High Risk regardless of score.
-        - STTC / CD are High Risk if confidence >= 75%, Medium if >= 50%.
-        - HYP is High Risk if confidence >= 85%, Medium if >= 60%.
-        - NORM is Low Risk if confidence >= 80%, Medium if < 80%.
-        """
+        """Condition-aware clinical risk stratification logic."""
         if predicted_class == "MI":
             return "High"
 
@@ -137,29 +117,32 @@ class ECGPredictor:
                 return "Medium"
             return "Low"
 
-        # Default for NORM or other
         if confidence >= 80.0:
             return "Low"
         return "Medium"
 
     @staticmethod
     def _get_recommendation(predicted_class: str) -> str:
-        """
-        Retrieve standardized medical recommendation for predicted class.
-        """
+        """Retrieve standardized medical recommendation for predicted class."""
         return CLINICAL_RECOMMENDATIONS.get(predicted_class, DEFAULT_RECOMMENDATION)
 
     def _generate_clinical_evidence(
         self,
-        predicted_class: str,
+        primary_class: str,
         confidence: float,
-        top_features: List[Dict[str, Any]],
-        probabilities: Dict[str, float]
+        predicted_classes: List[str],
+        top_features: List[Dict[str, Any]]
     ) -> List[str]:
-        """Generate evidence statements strictly from model probabilities and top SHAP attributions."""
+        """Generate clinical evidence statements."""
         evidence: List[str] = [
-            f"Model predicted primary diagnostic class {predicted_class} with {confidence}% probability.",
+            f"Model predicted primary diagnostic class {primary_class} with {confidence}% probability.",
         ]
+        if len(predicted_classes) > 1:
+            other = [c for c in predicted_classes if c != primary_class]
+            evidence.append(f"Additional active threshold findings detected: {', '.join(other)}.")
+        elif not predicted_classes:
+            evidence.append("No diagnostic class exceeded its precision-target threshold.")
+
         if top_features:
             primary_feat = top_features[0]
             evidence.append(
@@ -216,52 +199,48 @@ class ECGPredictor:
         waveform_data: Dict[str, Any] | None = None
     ) -> Dict[str, Any]:
         """
-        Complete ECG prediction pipeline with clinical risk stratification and warnings.
+        Complete ECG prediction pipeline for v5 bundle.
         """
-        logger.info("Executing ECG prediction pipeline...")
+        logger.info("Executing v5 ECG prediction pipeline...")
 
-        scaled_df = self._preprocess_features(extracted_features)
+        # 1. Align & Preprocess Features
+        raw_df = self.align_raw_features(extracted_features)
+        preprocessed_df = self.preprocess_features(raw_df)
 
-        raw_prediction = self.predict(scaled_df)
-        raw_probabilities = self.predict_proba(scaled_df)
+        # 2. Compute Probabilities & Apply Precision-Target Thresholds
+        prob_dict = self.predict_probabilities(preprocessed_df)
+        predicted_classes, primary_class, confidence = self.evaluate_thresholds(prob_dict)
 
-        prediction_vector = raw_prediction[0].tolist()
-        prob_dict, predicted_classes, confidence_scores = self._process_probabilities(
-            prediction_vector, raw_probabilities
-        )
+        risk_level = self._calculate_clinical_risk(primary_class, confidence)
+        recommendation = self._get_recommendation(primary_class)
 
-        if not predicted_classes:
-            logger.warning("No ECG class predicted by multi-output model.")
-            return {"error": "No ECG class predicted."}
+        # 3. Compute SHAP attributions for primary class
+        top_features = self.explainer.top_features(preprocessed_df, primary_class)
 
-        predicted_class = predicted_classes[0]
-        confidence = round(confidence_scores[predicted_class] * 100.0, 2)
-        risk_level = self._calculate_clinical_risk(predicted_class, confidence)
-        recommendation = self._get_recommendation(predicted_class)
+        # 4. Evidence & Guidance
+        clinical_evidence = self._generate_clinical_evidence(primary_class, confidence, predicted_classes, top_features)
+        review_guidance = self._generate_review_guidance(primary_class, risk_level)
 
-        top_features = self.explainer.top_features(scaled_df, predicted_class)
-        clinical_evidence = self._generate_clinical_evidence(predicted_class, confidence, top_features, prob_dict)
-        review_guidance = self._generate_review_guidance(predicted_class, risk_level)
-
-        # Assemble clinical warnings
+        # 5. Clinical Alerts & Warnings
         clinical_warnings: List[str] = list(base_warnings or [])
-        if predicted_class == "MI":
+        if primary_class == "MI":
             clinical_warnings.insert(
                 0,
                 "CRITICAL ALERT: ECG pattern suggests acute Myocardial Infarction (MI). Immediate clinical evaluation required."
             )
-        elif predicted_class in ["CD", "STTC"] and risk_level == "High":
+        elif primary_class in ["CD", "STTC"] and risk_level == "High":
             clinical_warnings.insert(
                 0,
-                f"HIGH RISK ALERT: High probability of {predicted_class} abnormality detected. Cardiology review advised."
+                f"HIGH RISK ALERT: High probability of {primary_class} abnormality detected. Cardiology review advised."
             )
 
         logger.info(
-            f"Prediction completed: class={predicted_class}, confidence={confidence}%, risk={risk_level}"
+            f"Prediction completed: primary={primary_class}, confidence={confidence}%, "
+            f"predicted_active={predicted_classes}, risk={risk_level}"
         )
 
         response: Dict[str, Any] = {
-            "diagnosis": predicted_class,
+            "diagnosis": primary_class,
             "confidence": confidence,
             "risk_level": risk_level,
             "recommendation": recommendation,
@@ -273,14 +252,14 @@ class ECGPredictor:
         }
 
         if record_info:
+            record_info["extracted_features_count"] = len(self.loader.feature_names_in)
+            record_info["model_features_count"] = len(self.loader.feature_names_model)
             response["record_info"] = record_info
 
         if waveform_data:
             response["waveform_data"] = waveform_data
-
         if signal_quality:
             response["signal_quality"] = signal_quality
-
         if clinical_warnings:
             response["clinical_warnings"] = clinical_warnings
 

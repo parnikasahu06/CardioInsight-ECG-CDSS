@@ -37,8 +37,19 @@ tmp/
 data/
 *.zip
 
-# Generated reports
+# Generated reports & scratch
 reports/
-
-# Scratch / temporary work
 scratch/
+
+# Outputs directory exclusions (keep only v5 run_summary.json and headline_metrics.json)
+outputs/*
+!outputs/v5_final/
+outputs/v5_final/*
+!outputs/v5_final/run_summary.json
+!outputs/v5_final/tables/
+outputs/v5_final/tables/*
+!outputs/v5_final/tables/headline_metrics.json
+
+# Legacy code & comparison scripts
+backend/legacy_v_old/
+backend/scripts/compare_json_contracts.py
