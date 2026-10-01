@@ -19,6 +19,9 @@ export const SignalQualityCard: React.FC<SignalQualityCardProps> = ({ signalQual
   const saturated_leads = signalQuality?.saturated_leads ?? [];
   const isHealthy = status === 'Excellent' || status === 'Acceptable';
 
+  const extractedCount = recordInfo?.extracted_features_count ?? 322;
+  const modelCount = recordInfo?.model_features_count ?? 274;
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-md space-y-4 transition-colors">
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -71,12 +74,13 @@ export const SignalQualityCard: React.FC<SignalQualityCardProps> = ({ signalQual
       <div className="bg-sky-50/70 dark:bg-sky-950/50 border border-sky-200 dark:border-sky-800 rounded-xl p-3.5 text-xs text-sky-950 dark:text-sky-200 space-y-1">
         <div className="font-bold text-sky-900 dark:text-sky-100 flex items-center gap-2">
           <Activity className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-          <span>213 ECG-Derived Features Extracted from Record</span>
+          <span>{extractedCount} ECG-Derived Features Extracted from Record</span>
         </div>
         <p className="text-[11px] text-sky-800 dark:text-sky-300 leading-relaxed">
-          These 213 features are numerical measurements derived from the ECG signal (including P-QRS-T wave amplitudes, interval durations, lead voltage variances, and spectral power densities) used by the trained XGBoost model for classification.
+          These {extractedCount} features ({modelCount} preprocessed features used for inference) are numerical measurements derived from the ECG signal (including P-QRS-T wave amplitudes, interval durations, lead voltage variances, and spectral power densities) used by the trained XGBoost model for classification.
         </p>
       </div>
+
 
       {/* Discovered Signal Warnings */}
       {((flatline_leads && flatline_leads.length > 0) ||

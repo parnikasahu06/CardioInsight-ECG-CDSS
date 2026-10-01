@@ -140,7 +140,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <h3 className="font-bold text-base text-slate-900 dark:text-white">AI Analysis Engine</h3>
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pt-1">
-            213 ECG features analyzed using a multi-output XGBoost classifier with SHAP-based explainability.
+            322 extracted (274 preprocessed) ECG features analyzed using a multi-output XGBoost classifier with SHAP-based explainability.
           </p>
         </div>
 

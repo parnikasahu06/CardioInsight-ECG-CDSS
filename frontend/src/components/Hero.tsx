@@ -34,7 +34,7 @@ export const Hero: React.FC = () => {
             <div className="flex flex-wrap gap-4 pt-2 text-xs sm:text-sm text-slate-300">
               <div className="flex items-center gap-2 bg-slate-800/80 backdrop-blur px-3 py-2 rounded-lg border border-slate-700">
                 <Activity className="w-4 h-4 text-sky-400" />
-                <span>213 Extracted ECG Features</span>
+                <span>322 Extracted ECG Features</span>
               </div>
               <div className="flex items-center gap-2 bg-slate-800/80 backdrop-blur px-3 py-2 rounded-lg border border-slate-700">
                 <Cpu className="w-4 h-4 text-emerald-400" />
