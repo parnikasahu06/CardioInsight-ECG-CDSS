@@ -9,6 +9,7 @@ interface HeaderProps {
   onOpenMobileMenu: () => void;
   recordInfo?: RecordInfo;
   diagnosis?: string;
+  decisionStatus?: string;
   hasAnalysis: boolean;
 }
 
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileMenu,
   recordInfo,
   diagnosis,
+  decisionStatus,
   hasAnalysis,
 }) => {
   const { theme, toggleTheme } = useTheme();
@@ -47,9 +49,13 @@ export const Header: React.FC<HeaderProps> = ({
                   {recordInfo?.n_leads || 12}-Lead ECG
                 </span>
                 <span className="text-sky-400 dark:text-sky-600">•</span>
-                <span className="font-extrabold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                <span className={`font-extrabold flex items-center gap-1 ${
+                  decisionStatus === 'no_class_above_threshold' ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'
+                }`}>
                   <FileCheck className="w-3.5 h-3.5" />
-                  Analysis Complete ({diagnosis})
+                  {decisionStatus === 'no_class_above_threshold'
+                    ? 'Analysis Complete (No class above threshold)'
+                    : `Analysis Complete (${diagnosis})`}
                 </span>
               </div>
             </div>

@@ -93,7 +93,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs">
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700">
               <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Primary AI Finding</span>
-              <span className="text-base font-extrabold text-slate-900 dark:text-white">{result.diagnosis}</span>
+              <span className="text-base font-extrabold text-slate-900 dark:text-white">
+                {result.decision_status === 'no_class_above_threshold' ? 'No class above decision threshold' : result.diagnosis}
+              </span>
             </div>
             <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700">
               <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Model Confidence</span>

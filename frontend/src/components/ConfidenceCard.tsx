@@ -5,15 +5,27 @@ import { Target, TrendingUp, HelpCircle } from 'lucide-react';
 
 interface ConfidenceCardProps {
   confidence: number;
+  decisionStatus?: string;
+  diagnosis?: string;
+  thresholds?: Record<string, number>;
 }
 
-export const ConfidenceCard: React.FC<ConfidenceCardProps> = ({ confidence }) => {
+export const ConfidenceCard: React.FC<ConfidenceCardProps> = ({
+  confidence,
+  decisionStatus,
+  diagnosis,
+  thresholds,
+}) => {
+  const isNoClassAbove = decisionStatus === 'no_class_above_threshold';
   const normalizedConfidence = Math.min(Math.max(confidence, 0), 100);
 
   const getConfidenceLevel = (val: number) => {
-    if (val >= 85) return { label: 'High Certainty', color: 'text-emerald-700', barBg: 'bg-emerald-500' };
-    if (val >= 60) return { label: 'Moderate Certainty', color: 'text-amber-700', barBg: 'bg-amber-500' };
-    return { label: 'Low Certainty', color: 'text-red-700', barBg: 'bg-red-500' };
+    if (isNoClassAbove) {
+      return { label: 'Below Decision Threshold', color: 'text-amber-700 dark:text-amber-400', barBg: 'bg-amber-500' };
+    }
+    if (val >= 85) return { label: 'High Certainty', color: 'text-emerald-700 dark:text-emerald-400', barBg: 'bg-emerald-500' };
+    if (val >= 60) return { label: 'Moderate Certainty', color: 'text-amber-700 dark:text-amber-400', barBg: 'bg-amber-500' };
+    return { label: 'Low Certainty', color: 'text-red-700 dark:text-red-400', barBg: 'bg-red-500' };
   };
 
   const levelInfo = getConfidenceLevel(normalizedConfidence);
@@ -22,7 +34,9 @@ export const ConfidenceCard: React.FC<ConfidenceCardProps> = ({ confidence }) =>
     <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg flex flex-col justify-between h-full transition-colors">
       <div>
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Prediction Confidence</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            {isNoClassAbove ? 'Highest Class Score' : 'Prediction Confidence'}
+          </span>
           <div className="flex items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-help">
             <Target className="w-4 h-4" />
           </div>
@@ -36,7 +50,7 @@ export const ConfidenceCard: React.FC<ConfidenceCardProps> = ({ confidence }) =>
             <span className="text-xl font-bold text-slate-500 dark:text-slate-400">%</span>
           </div>
 
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 ${levelInfo.color}`}>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-800 ${levelInfo.color}`}>
             {levelInfo.label}
           </span>
         </div>

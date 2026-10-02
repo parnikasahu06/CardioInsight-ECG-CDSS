@@ -68,7 +68,7 @@ export const DiagnosisCard: React.FC<DiagnosisCardProps> = ({
           <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
             isNoClassAbove ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800' : details.badgeColor
           }`}>
-            {isNoClassAbove ? 'Uncertain / Below Threshold' : details.category}
+            {isNoClassAbove ? 'Below Threshold' : details.category}
           </span>
         </div>
 
@@ -93,7 +93,7 @@ export const DiagnosisCard: React.FC<DiagnosisCardProps> = ({
         <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700 space-y-2">
           <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed font-medium">
             {isNoClassAbove
-              ? 'No diagnostic class met or exceeded its precision-target decision threshold. Model output is uncertain; clinician review advised.'
+              ? 'No diagnostic class reached its decision threshold. The highest-scoring class is shown for reference only. Clinician review advised.'
               : details.description}
           </p>
           <p className="text-[11px] text-sky-800 dark:text-sky-300 font-semibold bg-sky-50 dark:bg-sky-950/80 p-2 rounded-lg border border-sky-100 dark:border-sky-800">
