@@ -69,7 +69,7 @@ export const ProbabilityChart: React.FC<ProbabilityChartProps> = ({ probabilitie
 
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+          <BarChart data={chartData} margin={{ top: 30, right: 30, left: 0, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.3} />
             <XAxis
               dataKey="name"
@@ -97,7 +97,7 @@ export const ProbabilityChart: React.FC<ProbabilityChartProps> = ({ probabilitie
               }}
             />
             <Bar dataKey="probability" radius={[8, 8, 0, 0]} maxBarSize={55}>
-              <LabelList dataKey="probability" position="top" formatter={(val: number) => `${val}%`} fill="#0284c7" fontSize={11} fontWeight={700} />
+              <LabelList dataKey="probability" position="top" offset={10} formatter={(val: number) => `${val}%`} fill="#0284c7" fontSize={11} fontWeight={700} />
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}

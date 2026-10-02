@@ -3,6 +3,7 @@
 import React from 'react';
 import { ECGPredictionResponse, ClinicianReview } from '@/types/ecg';
 import { Printer, X, Activity, AlertCircle } from 'lucide-react';
+import { formatFeatureName, formatTimestamp } from '@/lib/formatters';
 
 interface ECGReportModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
   const supportedClasses = ['NORM', 'MI', 'CD', 'HYP', 'STTC'];
 
   const classDescriptions: Record<string, string> = {
-    NORM: 'Normal ECG — Baseline Sinus Pattern',
+    NORM: 'Normal Trace — Baseline Sinus Pattern',
     MI: 'Myocardial Infarction — Ischemic Tissue Alteration',
     CD: 'Conduction Disturbance — Impulse Conduction Delay/Block',
     HYP: 'Hypertrophy — High Voltage Ventricular Enlargement',
@@ -105,7 +106,7 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
             
             <div className="text-right text-xs text-slate-600 space-y-1">
               <div className="font-bold text-slate-900">CONFIDENTIAL MEDICAL DOCUMENT</div>
-              <div>Report Date: {rec?.timestamp || new Date().toLocaleString()}</div>
+              <div>Report Date: {formatTimestamp(rec?.timestamp)}</div>
               <div className="font-mono text-[11px] text-slate-500">Pipeline: XGBoost + SHAP Engine</div>
             </div>
           </div>
@@ -122,7 +123,7 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
               </div>
               <div>
                 <span className="text-slate-500 block text-[11px]">Analysis Timestamp</span>
-                <span className="font-medium text-slate-900">{rec?.timestamp || 'N/A'}</span>
+                <span className="font-medium text-slate-900">{formatTimestamp(rec?.timestamp)}</span>
               </div>
               <div>
                 <span className="text-slate-500 block text-[11px]">Sampling Frequency</span>
@@ -273,20 +274,34 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 text-[11px]">
-                      {result.top_features.map((feat, idx) => (
-                        <tr key={idx}>
-                          <td className="p-2 font-bold text-slate-900">{feat.clean_name || feat.Feature}</td>
-                          <td className="p-2">
-                            {feat.direction === 'positive' || (feat.SHAP && feat.SHAP >= 0) ? (
-                              <span className="text-emerald-700 font-bold">Positive Support (+)</span>
-                            ) : (
-                              <span className="text-amber-700 font-bold">Suppressing Factor (-)</span>
-                            )}
-                          </td>
-                          <td className="p-2 text-right font-mono font-bold">{feat.SHAP ? (feat.SHAP >= 0 ? `+${feat.SHAP.toFixed(4)}` : feat.SHAP.toFixed(4)) : 'N/A'}</td>
-                          <td className="p-2 text-slate-600">{feat.interpretation || 'Model derived attribution metric.'}</td>
-                        </tr>
-                      ))}
+                      {result.top_features.map((feat, idx) => {
+                        const isPos = feat.direction === 'positive' || (feat.SHAP && feat.SHAP >= 0);
+                        const formattedName = formatFeatureName(feat.clean_name || feat.Feature);
+                        const valNum = Number(feat.SHAP || 0);
+                        const valStr = valNum >= 0 ? `+${valNum.toFixed(4)}` : valNum.toFixed(4);
+
+                        let attributionText = feat.interpretation || 'Model derived attribution metric.';
+                        if (result.decision_status === 'no_class_above_threshold') {
+                          attributionText = valNum >= 0
+                            ? `${formattedName} (${valStr}) raised the score of the highest-scoring class (${result.diagnosis}), which remained below its decision threshold.`
+                            : `${formattedName} (${valStr}) lowered the score of the highest-scoring class (${result.diagnosis}), which remained below its decision threshold.`;
+                        }
+
+                        return (
+                          <tr key={idx}>
+                            <td className="p-2 font-bold text-slate-900">{formattedName}</td>
+                            <td className="p-2">
+                              {isPos ? (
+                                <span className="text-emerald-700 font-bold">Positive Support (+)</span>
+                              ) : (
+                                <span className="text-amber-700 font-bold">Suppressing Factor (-)</span>
+                              )}
+                            </td>
+                            <td className="p-2 text-right font-mono font-bold">{valStr}</td>
+                            <td className="p-2 text-slate-600">{attributionText}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -346,7 +361,7 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
                 </div>
                 <div>
                   <div className="border-b border-slate-400 h-8 flex items-end font-mono text-[11px] pb-0.5">
-                    {clinicianReview.review_date || new Date().toLocaleDateString()}
+                    {formatTimestamp(clinicianReview.review_date)}
                   </div>
                   <span className="text-[10px] text-slate-500 block mt-1">Date & Time</span>
                 </div>
