@@ -50,7 +50,7 @@ export const ConfidenceCard: React.FC<ConfidenceCardProps> = ({ confidence }) =>
         </div>
 
         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Confidence reflects the calibrated model probability score assigned by the ensemble classifier to the top predicted diagnostic class.
+          Confidence reflects the probability score assigned by the XGBoost classifier to the top predicted diagnostic class.
         </p>
       </div>
 
@@ -59,7 +59,7 @@ export const ConfidenceCard: React.FC<ConfidenceCardProps> = ({ confidence }) =>
           <TrendingUp className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
           Model Metric
         </span>
-        <span className="font-bold text-slate-900 dark:text-white">XGBoost Softmax</span>
+        <span className="font-bold text-slate-900 dark:text-white">XGBoost Classifier</span>
       </div>
     </div>
   );

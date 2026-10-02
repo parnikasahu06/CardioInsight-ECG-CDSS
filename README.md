@@ -102,7 +102,7 @@ CardioInsight requires paired WFDB format files belonging to the same record ste
 - **Language**: TypeScript
 
 ### Backend
-- **Framework**: Python 3.14.0 (`.venv` environment; compatible with Python 3.10+), FastAPI, Uvicorn
+- **Framework**: Python 3.14.0 (verified), FastAPI, Uvicorn
 - **Validation**: Pydantic v2
 - **Data & Signal Processing**: NumPy, Pandas, SciPy, WFDB, NeuroKit2
 

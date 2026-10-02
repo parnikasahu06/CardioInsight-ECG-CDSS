@@ -156,6 +156,27 @@ class TestV5APIAndErrors(unittest.TestCase):
         self.assertIn(data["risk_level"], ["Low", "Medium", "High"])
         self.assertIsInstance(data["recommendation"], str)
 
+        # Verify only allowed fields (legacy 13 + 4 optional) appear in payload
+        allowed_keys = {
+            "diagnosis", "confidence", "risk_level", "recommendation",
+            "probabilities", "top_features", "clinical_evidence",
+            "review_guidance", "disclaimer", "record_info",
+            "waveform_data", "signal_quality", "clinical_warnings",
+            "positive_classes", "decision_status", "top_class_below_threshold", "decision_thresholds"
+        }
+        for key in data.keys():
+            self.assertIn(key, allowed_keys, f"Unexpected field '{key}' in API response payload")
+
+        if "positive_classes" in data:
+            self.assertIsInstance(data["positive_classes"], list)
+        if "decision_status" in data:
+            self.assertIn(data["decision_status"], ["positive", "no_class_above_threshold"])
+        if "top_class_below_threshold" in data:
+            self.assertIsInstance(data["top_class_below_threshold"], bool)
+        if "decision_thresholds" in data:
+            self.assertIsInstance(data["decision_thresholds"], dict)
+            self.assertEqual(data["decision_thresholds"].get("NORM"), 0.88)
+
         for k, v in data["probabilities"].items():
             self.assertIsInstance(v, float)
             self.assertTrue(0.0 <= v <= 100.0)
@@ -169,6 +190,39 @@ class TestV5APIAndErrors(unittest.TestCase):
             self.assertIn("interpretation", feat)
 
         print("Test F (API Contract Diff) passed successfully!")
+
+    def test_g_synthetic_evaluate_thresholds(self):
+        """Test G: Synthetic unit test of evaluate_thresholds covering multi-positive, all-below, and exact-threshold cases."""
+        from backend.predict import evaluate_thresholds
+
+        # Case 1: Two classes positive (CD 80%, HYP 50%). Headline must be CD (higher probability).
+        probs_two_pos = {"CD": 80.0, "HYP": 50.0, "MI": 10.0, "NORM": 10.0, "STTC": 10.0}
+        res_two_pos = evaluate_thresholds(probs_two_pos)
+        self.assertEqual(res_two_pos["primary_class"], "CD")
+        self.assertEqual(res_two_pos["confidence"], 80.0)
+        self.assertEqual(set(res_two_pos["positive_classes"]), {"CD", "HYP"})
+        self.assertEqual(res_two_pos["decision_status"], "positive")
+        self.assertFalse(res_two_pos["top_class_below_threshold"])
+
+        # Case 2: All below threshold (NORM 62%, threshold is 88%).
+        probs_all_below = {"CD": 10.0, "HYP": 10.0, "MI": 10.0, "NORM": 62.0, "STTC": 10.0}
+        res_all_below = evaluate_thresholds(probs_all_below)
+        self.assertEqual(res_all_below["primary_class"], "NORM")
+        self.assertEqual(res_all_below["confidence"], 62.0)
+        self.assertEqual(res_all_below["positive_classes"], [])
+        self.assertEqual(res_all_below["decision_status"], "no_class_above_threshold")
+        self.assertTrue(res_all_below["top_class_below_threshold"])
+
+        # Case 3: Exactly equal to threshold (CD 70%, threshold is 70% -> counts as positive).
+        probs_exact = {"CD": 70.0, "HYP": 10.0, "MI": 10.0, "NORM": 10.0, "STTC": 10.0}
+        res_exact = evaluate_thresholds(probs_exact)
+        self.assertEqual(res_exact["primary_class"], "CD")
+        self.assertEqual(res_exact["confidence"], 70.0)
+        self.assertEqual(res_exact["positive_classes"], ["CD"])
+        self.assertEqual(res_exact["decision_status"], "positive")
+        self.assertFalse(res_exact["top_class_below_threshold"])
+
+        print("Test G (Synthetic evaluate_thresholds unit test) passed successfully!")
 
 
 if __name__ == "__main__":

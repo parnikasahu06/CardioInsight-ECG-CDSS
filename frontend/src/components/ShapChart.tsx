@@ -18,9 +18,10 @@ import { HelpCircle, Layers } from 'lucide-react';
 interface ShapChartProps {
   topFeatures: ShapFeature[];
   predictedDiagnosis: string;
+  decisionStatus?: string;
 }
 
-export const ShapChart: React.FC<ShapChartProps> = ({ topFeatures, predictedDiagnosis }) => {
+export const ShapChart: React.FC<ShapChartProps> = ({ topFeatures, predictedDiagnosis, decisionStatus }) => {
   if (!topFeatures || topFeatures.length === 0) {
     return (
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-lg text-center text-slate-500 text-sm">
@@ -46,7 +47,11 @@ export const ShapChart: React.FC<ShapChartProps> = ({ topFeatures, predictedDiag
             <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">SHAP Feature Importance</h3>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Top ECG parameters driving model decision for <span className="font-semibold text-slate-700 dark:text-slate-300">{predictedDiagnosis}</span>
+            {decisionStatus === 'no_class_above_threshold' ? (
+              <>Features driving the highest-scoring class (below decision threshold): <span className="font-semibold text-slate-700 dark:text-slate-300">{predictedDiagnosis}</span></>
+            ) : (
+              <>Top ECG parameters driving model decision for <span className="font-semibold text-slate-700 dark:text-slate-300">{predictedDiagnosis}</span></>
+            )}
           </p>
         </div>
 

@@ -242,7 +242,7 @@ function CardioInsightApp() {
 
               {/* SECTION 5: SHAP EXPLANATION */}
               <div ref={explanationRef} className="scroll-mt-20">
-                <ShapChart topFeatures={result.top_features} predictedDiagnosis={result.diagnosis} />
+                <ShapChart topFeatures={result.top_features} predictedDiagnosis={result.diagnosis} decisionStatus={result.decision_status} />
               </div>
 
               {/* SECTION 6: CLINICAL DECISION SUPPORT & REVIEW GUIDANCE */}
