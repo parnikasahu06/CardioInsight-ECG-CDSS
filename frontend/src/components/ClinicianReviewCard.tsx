@@ -3,6 +3,7 @@
 import React from 'react';
 import { ClinicianReview } from '@/types/ecg';
 import { UserCheck, FileText, CheckCircle2, AlertTriangle, HelpCircle } from 'lucide-react';
+import { formatTimestamp } from '@/lib/formatters';
 
 interface ClinicianReviewCardProps {
   review: ClinicianReview;
@@ -120,7 +121,7 @@ export const ClinicianReviewCard: React.FC<ClinicianReviewCardProps> = ({ review
           <input
             type="text"
             readOnly
-            value={review.review_date || new Date().toLocaleString()}
+            value={formatTimestamp(review.review_date)}
             className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3.5 py-2 text-xs text-slate-600 dark:text-slate-300 font-mono"
           />
         </div>

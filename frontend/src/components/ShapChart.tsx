@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { ShapFeature } from '@/types/ecg';
 import { HelpCircle, Layers } from 'lucide-react';
+import { formatFeatureName } from '@/lib/formatters';
 
 interface ShapChartProps {
   topFeatures: ShapFeature[];
@@ -31,12 +32,13 @@ export const ShapChart: React.FC<ShapChartProps> = ({ topFeatures, predictedDiag
   }
 
   const chartData = topFeatures.map(item => ({
-    name: item.Feature,
-    cleanName: item.Feature.replace(/_/g, ' ').toUpperCase(),
+    name: formatFeatureName(item.Feature),
+    cleanName: formatFeatureName(item.clean_name || item.Feature),
     shap: Number(item.SHAP),
     absShap: Number(item.AbsSHAP),
     isPositive: Number(item.SHAP) >= 0,
   }));
+
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-lg transition-colors">
@@ -121,13 +123,17 @@ export const ShapChart: React.FC<ShapChartProps> = ({ topFeatures, predictedDiag
         <div className="space-y-2">
           {topFeatures.map((item, idx) => {
             const isPos = Number(item.SHAP) >= 0;
+            const formattedName = formatFeatureName(item.clean_name || item.Feature);
+            const valNum = Number(item.SHAP);
+            const valStr = valNum >= 0 ? `+${valNum.toFixed(4)}` : valNum.toFixed(4);
+
             return (
               <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 dark:text-white">{item.clean_name || item.Feature}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{formattedName}</span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                      SHAP: {item.SHAP >= 0 ? `+${item.SHAP.toFixed(4)}` : item.SHAP.toFixed(4)}
+                      SHAP: {valStr}
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       isPos ? 'bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
@@ -137,7 +143,11 @@ export const ShapChart: React.FC<ShapChartProps> = ({ topFeatures, predictedDiag
                   </div>
                 </div>
                 <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                  {isPos
+                  {decisionStatus === 'no_class_above_threshold'
+                    ? isPos
+                      ? `${formattedName} (${valStr}) raised the score of the highest-scoring class (${predictedDiagnosis}), which remained below its decision threshold.`
+                      : `${formattedName} (${valStr}) lowered the score of the highest-scoring class (${predictedDiagnosis}), which remained below its decision threshold.`
+                    : isPos
                     ? `Positive contribution: This feature pushed the model toward the predicted class (${predictedDiagnosis}).`
                     : `Negative contribution: This feature pushed the model away from the predicted class (${predictedDiagnosis}).`}
                 </p>

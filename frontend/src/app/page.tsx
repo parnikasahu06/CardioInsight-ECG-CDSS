@@ -19,6 +19,7 @@ import { ClinicianReviewCard } from '@/components/ClinicianReviewCard';
 import { ECGReportModal } from '@/components/ECGReportModal';
 import { ECGPredictionResponse, ClinicianReview } from '@/types/ecg';
 import { uploadECGFiles, checkBackendHealth } from '@/lib/api';
+import { formatTimestamp } from '@/lib/formatters';
 import { AlertCircle, RefreshCw, Download, ShieldAlert, Activity, FileText } from 'lucide-react';
 
 function CardioInsightApp() {
@@ -39,7 +40,7 @@ function CardioInsightApp() {
     clinician_name: '',
     review_status: '',
     notes: '',
-    review_date: new Date().toLocaleString(),
+    review_date: formatTimestamp(),
   });
 
   // Periodically verify backend status
@@ -65,7 +66,7 @@ function CardioInsightApp() {
         clinician_name: '',
         review_status: '',
         notes: '',
-        review_date: new Date().toLocaleString(),
+        review_date: formatTimestamp(),
       });
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred during ECG analysis.');

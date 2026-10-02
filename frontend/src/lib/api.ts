@@ -5,9 +5,9 @@ let activeBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://cardioinsight-ec
 async function getWorkingBaseUrl(): Promise<string> {
   const candidates = [
     process.env.NEXT_PUBLIC_API_URL,
-    'https://cardioinsight-ecg-cdss.onrender.com',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
+    'https://cardioinsight-ecg-cdss.onrender.com',
   ].filter(Boolean) as string[];
 
   for (const url of candidates) {
