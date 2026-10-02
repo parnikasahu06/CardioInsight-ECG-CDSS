@@ -126,6 +126,7 @@ function CardioInsightApp() {
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           recordInfo={result?.record_info}
           diagnosis={result?.diagnosis}
+          decisionStatus={result?.decision_status}
           hasAnalysis={hasAnalysis}
         />
 
@@ -222,8 +223,19 @@ function CardioInsightApp() {
 
               {/* SECTION 2: PRIMARY AI FINDING, CONFIDENCE & REVIEW PRIORITY */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <DiagnosisCard diagnosis={result.diagnosis} />
-                <ConfidenceCard confidence={result.confidence} />
+                <DiagnosisCard
+                  diagnosis={result.diagnosis}
+                  decisionStatus={result.decision_status}
+                  confidence={result.confidence}
+                  thresholds={result.decision_thresholds}
+                  positiveClasses={result.positive_classes}
+                />
+                <ConfidenceCard
+                  confidence={result.confidence}
+                  decisionStatus={result.decision_status}
+                  diagnosis={result.diagnosis}
+                  thresholds={result.decision_thresholds}
+                />
                 <RiskBadge riskLevel={result.risk_level} />
               </div>
 
