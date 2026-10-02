@@ -183,7 +183,9 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
             <div className="grid grid-cols-3 gap-3 bg-sky-50/60 p-4 rounded-xl border border-sky-200 text-xs mb-3">
               <div>
                 <span className="text-sky-800 font-bold block text-[11px]">Primary Predicted Class</span>
-                <span className="text-base font-black text-sky-950">{result.diagnosis}</span>
+                <span className="text-base font-black text-sky-950">
+                  {result.decision_status === 'no_class_above_threshold' ? 'No class above decision threshold' : result.diagnosis}
+                </span>
               </div>
               <div>
                 <span className="text-sky-800 font-bold block text-[11px]">Model Confidence</span>
@@ -195,9 +197,16 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-[11px] text-slate-600 mb-3">
-              Review priority reflects model uncertainty and secondary class outputs. It is not a clinical patient-risk score.
-            </div>
+            {result.decision_status === 'no_class_above_threshold' ? (
+              <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-[11px] text-amber-900 mb-3">
+                Highest score: <span className="font-bold">{result.diagnosis}</span> ({result.confidence.toFixed(2)}%
+                {result.decision_thresholds?.[result.diagnosis] !== undefined ? `, threshold ${(result.decision_thresholds[result.diagnosis] * 100).toFixed(0)}%` : ''})
+              </div>
+            ) : (
+              <div className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-[11px] text-slate-600 mb-3">
+                Review priority reflects model uncertainty and secondary class outputs. It is not a clinical patient-risk score.
+              </div>
+            )}
 
             {/* Supported Class Probabilities Table */}
             <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
@@ -212,9 +221,10 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
               <tbody className="divide-y divide-slate-200">
                 {supportedClasses.map((cls) => {
                   const prob = result.probabilities?.[cls] ?? 0.0;
-                  const isPrimary = cls === result.diagnosis;
+                  const isPositive = result.positive_classes ? result.positive_classes.includes(cls) : (result.decision_status !== 'no_class_above_threshold' && cls === result.diagnosis);
+                  const isPrimary = result.decision_status !== 'no_class_above_threshold' && cls === result.diagnosis;
                   return (
-                    <tr key={cls} className={isPrimary ? 'bg-sky-50 font-bold' : 'hover:bg-slate-50'}>
+                    <tr key={cls} className={isPrimary ? 'bg-sky-50 font-bold' : isPositive ? 'bg-emerald-50/50 font-semibold' : 'hover:bg-slate-50'}>
                       <td className="p-2.5 font-mono font-bold text-slate-900">{cls}</td>
                       <td className="p-2.5 text-slate-700">{classDescriptions[cls] || cls}</td>
                       <td className="p-2.5 text-right font-mono font-bold">{prob.toFixed(2)}%</td>
@@ -223,8 +233,14 @@ export const ECGReportModal: React.FC<ECGReportModalProps> = ({
                           <span className="bg-sky-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
                             Primary Finding
                           </span>
+                        ) : isPositive ? (
+                          <span className="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
+                            Secondary Positive
+                          </span>
                         ) : (
-                          <span className="text-slate-400 text-[11px]">Evaluated</span>
+                          <span className="text-slate-400 text-[11px]">
+                            {result.decision_status === 'no_class_above_threshold' ? 'Below Threshold' : 'Evaluated'}
+                          </span>
                         )}
                       </td>
                     </tr>

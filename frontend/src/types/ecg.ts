@@ -62,8 +62,13 @@ export interface ECGPredictionResponse {
   review_guidance?: string[];
   clinical_warnings?: string[];
   disclaimer?: string;
+  positive_classes?: string[];
+  decision_status?: 'positive' | 'no_class_above_threshold';
+  top_class_below_threshold?: boolean;
+  decision_thresholds?: Record<string, number>;
   error?: string;
 }
+
 
 export interface UploadState {
   heaFile: File | null;

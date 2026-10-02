@@ -113,7 +113,7 @@ export const ProbabilityChart: React.FC<ProbabilityChartProps> = ({ probabilitie
       </div>
 
       <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span>XGBoost Softmax Outputs</span>
+        <span>XGBoost per-class probability</span>
         <span className="italic">These values represent model outputs and should not be interpreted as independently validated clinical probabilities.</span>
       </div>
     </div>

@@ -33,7 +33,7 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({ riskLevel }) => {
           color: 'bg-red-50 text-red-800 border-red-200',
           badgeBg: 'bg-red-600 text-white',
           icon: <AlertTriangle className="w-6 h-6 text-red-600" />,
-          description: 'Ischemic or critical conduction pattern predicted. Immediate expert cardiology review strongly advised.'
+          description: 'High priority cardiac pattern predicted. Expert cardiology review advised.'
         };
       default:
         return {
