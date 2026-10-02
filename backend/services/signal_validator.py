@@ -149,7 +149,7 @@ class ECGSignalValidator:
 
         if sampling_rate != 500:
             warnings.append(
-                f"Sampling rate mismatch: Received {sampling_rate} Hz. Model is calibrated for 500 Hz."
+                f"Sampling rate mismatch: Received {sampling_rate} Hz. Model requires 500 Hz."
             )
 
         flatline = signal_quality.get("flatline_leads", [])

@@ -68,7 +68,12 @@ class ECGPredictionResponseModel(BaseModel):
     review_guidance: Optional[List[str]] = Field(None, description="Appropriate review guidance for clinician")
     signal_quality: Optional[SignalQualityModel] = Field(None, description="Signal quality metrics")
     clinical_warnings: Optional[List[str]] = Field(None, description="Clinical alerts and warnings")
-    disclaimer: Optional[str] = Field(None, description="CDSS medical disclaimer")
+    disclaimer: Optional[str] = Field(None, description="Medical legal disclaimer")
+    positive_classes: Optional[List[str]] = Field(default_factory=list, description="List of class codes exceeding decision thresholds")
+    decision_status: Optional[str] = Field("positive", description="Classification status: 'positive' or 'no_class_above_threshold'")
+    top_class_below_threshold: Optional[bool] = Field(False, description="True if no diagnostic class exceeded its decision threshold")
+    decision_thresholds: Optional[Dict[str, float]] = Field(default_factory=dict, description="Per-class decision thresholds as fractional probabilities")
+
 
 
 class HealthResponseModel(BaseModel):
